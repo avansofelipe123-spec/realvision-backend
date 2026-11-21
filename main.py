@@ -7,10 +7,9 @@ from typing import Literal
 app = FastAPI(
     title="RealVision AI",
     description="API oficial do RealVision AI",
-    version="1.0.1"
+    version="1.1.0"
 )
 
-# Permitir comunicação com o aplicativo
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,10 +18,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class VideoRequest(BaseModel):
     prompt: str = Field(min_length=5, max_length=1000)
+
     duration: Literal[10, 30, 60] = 60
+
     quality: Literal["720p", "1080p"] = "1080p"
+
     style: Literal[
         "realista",
         "cinematografico",
@@ -30,13 +33,39 @@ class VideoRequest(BaseModel):
         "natureza"
     ] = "realista"
 
+    # Configuração de áudio
+    audio_mode: Literal["all"] = "all"
+
+    # Configuração de voz
+    voice_selection: Literal["choose"] = "choose"
+
+    voice_gender: Literal[
+        "masculina",
+        "feminina"
+    ] = "masculina"
+
+    language: Literal[
+        "pt-BR",
+        "pt-PT",
+        "en",
+        "de"
+    ] = "pt-BR"
+
+    accent: Literal[
+        "brasileiro",
+        "portugal",
+        "americano",
+        "britanico",
+        "alema"
+    ] = "brasileiro"
+
 
 @app.get("/")
 def home():
     return {
         "app": "RealVision AI",
         "status": "online",
-        "version": "1.0.1"
+        "version": "1.1.0"
     }
 
 
@@ -51,9 +80,24 @@ def health():
 def generate_video(request: VideoRequest):
     return {
         "status": "waiting_for_engine",
-        "message": "Solicitação recebida. Motor de vídeo ainda não conectado.",
+        "message": (
+            "Solicitação recebida. "
+            "Motor de geração de vídeo e áudio ainda não conectado."
+        ),
+
         "prompt": request.prompt,
         "duration": request.duration,
         "quality": request.quality,
-        "style": request.style
+        "style": request.style,
+
+        "audio": {
+            "mode": request.audio_mode
+        },
+
+        "voice": {
+            "selection": request.voice_selection,
+            "gender": request.voice_gender,
+            "language": request.language,
+            "accent": request.accent
+        }
     }
